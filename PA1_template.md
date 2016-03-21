@@ -1,8 +1,11 @@
 ---
 title: "Reproducible Research Course Project 1"
 author: "Andrew Maloney"
-date: "February 7, 2016"
-output: html_document
+date: "February 21, 2016"
+output:
+  html_document:
+    keep_md: yes
+  word_document: default
 ---
 Load the activity.csv data by setting the working directory and reading it into R.
 
@@ -45,7 +48,7 @@ Now, make a time series plot of the 5-minute intervals and average number of ste
 ```r
 steps_per_interval <- tapply(data$steps, data$interval, mean, na.rm=TRUE)
 Activity_Pattern <- data.frame(steps_per_interval)
-plot(steps_per_interval, type="l", xlab="Intervals (1-288)", ylab="Average # of Steps", main = "Daily Activity Pattern")
+plot(Activity_Pattern, type="l", xlab="Intervals (1-288)", ylab="Average # of Steps", main = "Daily Activity Pattern")
 ```
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
@@ -94,3 +97,21 @@ median(new_steps_per_day)
 ```
 The adjusted mean AND median of the new data are 10,766.2. Filling in the missing values increased both measures and centered the distribution a bit more.
 
+Now, create a new factor variable indicating whether a given day is a weekday or weekend day.
+
+
+```r
+new_data$date <- as.Date(new_data$date)
+days <- weekdays(new_data$date)
+new_data$weekend <- sapply(days, switch, Monday = 'weekday', Tuesday = 'weekday', Wednesday = 'weekday', Thursday = 'weekday', Friday = 'weekday', Saturday = 'weekend', Sunday = 'weekend')
+```
+
+Create a panel plot of the 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days.
+
+```r
+library(lattice)
+result <- aggregate(steps ~ weekend + interval, new_data, mean)
+xyplot(result$steps ~ result$interval | factor(result$weekend), type="l", xlab="Interval", ylab="Number of Steps")
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
